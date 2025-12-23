@@ -57,17 +57,22 @@ def process_segmentation(df_user, df_behavior, df_prev=None):
     df['賭け金額合計'] = df['賭け金額合計'].fillna(0)
     
     now = datetime.now()
+    df['登録経過日数'] = (now - df['登録時間']).dt.days
     
-    seg1 = df[(df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 1) & (df['入金回数タグ'] == 0)]
+    # 01: 登録翌日のみ（1日経過〜2日未満）
+    seg1 = df[(df['登録時間'].notna()) & (df['登録経過日数'] == 1) & (df['入金回数タグ'] == 0)]
     results['01_登録翌日_未入金'] = seg1
     
-    seg2 = df[(df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 2) & (df['入金回数タグ'] == 0)]
+    # 02: 登録2日後のみ（2日経過〜3日未満）
+    seg2 = df[(df['登録時間'].notna()) & (df['登録経過日数'] == 2) & (df['入金回数タグ'] == 0)]
     results['02_登録2日後_未入金'] = seg2
     
-    seg3 = df[(df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 3) & (df['入金回数タグ'] == 0)]
+    # 03: 登録3日後のみ（3日経過〜4日未満）
+    seg3 = df[(df['登録時間'].notna()) & (df['登録経過日数'] == 3) & (df['入金回数タグ'] == 0)]
     results['03_登録3日後_未入金'] = seg3
     
-    seg4 = df[(df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 4) & (df['入金回数タグ'] == 0)]
+    # 04: 登録4日後のみ（4日経過〜5日未満）
+    seg4 = df[(df['登録時間'].notna()) & (df['登録経過日数'] == 4) & (df['入金回数タグ'] == 0)]
     results['04_登録4日後_未入金'] = seg4
     
     if df_prev is not None:
@@ -88,7 +93,7 @@ def process_segmentation(df_user, df_behavior, df_prev=None):
     seg7 = df[(df['現金残高'] >= 1) & (df['ログイン時間'].notna()) & ((now - df['ログイン時間']).dt.days >= 30)]
     results['07_残高あり30日非ログイン'] = seg7
     
-    seg8 = df[(df['現金残高'] >= 3000) & (df['賭け金額合計'] < 1) & (df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 1)]
+    seg8 = df[(df['現金残高'] >= 3000) & (df['賭け金額合計'] < 1) & (df['登録時間'].notna()) & (df['登録経過日数'] >= 1)]
     results['08_高残高で賭けなし'] = seg8
     
     return results
