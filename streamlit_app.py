@@ -59,16 +59,16 @@ def process_segmentation(df_user, df_behavior, df_prev=None):
     now = datetime.now()
     
     seg1 = df[(df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 1) & (df['入金回数タグ'] == 0)]
-    results['segment_01_payment'] = seg1
+    results['01_登録翌日_未入金'] = seg1
     
     seg2 = df[(df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 2) & (df['入金回数タグ'] == 0)]
-    results['segment_02_heavenshot'] = seg2
+    results['02_登録2日後_未入金'] = seg2
     
     seg3 = df[(df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 3) & (df['入金回数タグ'] == 0)]
-    results['segment_03_ticket10'] = seg3
+    results['03_登録3日後_未入金'] = seg3
     
     seg4 = df[(df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 4) & (df['入金回数タグ'] == 0)]
-    results['segment_04_cashback'] = seg4
+    results['04_登録4日後_未入金'] = seg4
     
     if df_prev is not None:
         df_prev.columns = df_prev.columns.str.strip()
@@ -78,18 +78,18 @@ def process_segmentation(df_user, df_behavior, df_prev=None):
         seg5 = df_cmp[(df_cmp['レベル_prev'] == 1) & (df_cmp['レベル_now'] == 2)].copy()
         if not seg5.empty:
             seg5 = seg5.drop(columns=['レベル_prev']).rename(columns={'レベル_now': 'レベル'})
-        results['segment_05_vip_lv2'] = seg5
+        results['05_レベル1から2昇格'] = seg5
         
         seg6 = df_cmp[df_cmp['レベル_now'] > df_cmp['レベル_prev']].copy()
         if not seg6.empty:
             seg6 = seg6.drop(columns=['レベル_prev']).rename(columns={'レベル_now': 'レベル'})
-        results['segment_06_vip_up'] = seg6
+        results['06_レベルアップ'] = seg6
     
     seg7 = df[(df['現金残高'] >= 1) & (df['ログイン時間'].notna()) & ((now - df['ログイン時間']).dt.days >= 30)]
-    results['segment_07_balance_inactive'] = seg7
+    results['07_残高あり30日非ログイン'] = seg7
     
     seg8 = df[(df['現金残高'] >= 3000) & (df['賭け金額合計'] < 1) & (df['登録時間'].notna()) & ((now - df['登録時間']).dt.days >= 1)]
-    results['segment_08_balance_no_bet'] = seg8
+    results['08_高残高で賭けなし'] = seg8
     
     return results
 
